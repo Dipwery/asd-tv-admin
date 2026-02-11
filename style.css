@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap');
+
+body { 
+    font-family: 'Hind Siliguri', sans-serif; 
+    background: #0b0e14; 
+    color: #e2e8f0; 
+}
+
+.glass-card { 
+    background: rgba(30, 41, 59, 0.5); 
+    backdrop-filter: blur(10px); 
+    border: 1px solid rgba(255, 255, 255, 0.05); 
+    border-radius: 16px; 
+}
+
+.stat-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border-bottom: 4px solid transparent;
+}
+
+input, select {
+    background: #0f172a !important;
+    border: 1px solid #334155 !important;
+    color: white !important;
+    outline: none;
+}
+
+input:focus { border-color: #ec4899 !important; }
+
+.btn-gradient { background: linear-gradient(90deg, #ec4899, #8b5cf6); }
+
+table { border-collapse: separate; border-spacing: 0 8px; }
+tr { background: rgba(30, 41, 59, 0.3); }
+td:first-child { border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+td:last-child { border-top-right-radius: 12px; border-bottom-right-radius: 12px; }
