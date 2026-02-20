@@ -25,13 +25,16 @@ async function loadDashboard() {
     offlineCount = 0;
 
     for (const ch of data) {
+        // টাইপ অনুযায়ী আলাদা রং নির্ধারণ (ঐচ্ছিক)
+        const typeColor = ch.type === 'tap' ? 'text-yellow-400' : 'text-pink-400';
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td class="p-4 flex items-center gap-3">
                 <img src="${ch.logo}" class="w-10 h-10 rounded-lg bg-slate-800 object-contain p-1 border border-slate-700" onerror="this.src='https://via.placeholder.com/40'">
                 <span class="font-bold text-sm text-gray-200">${ch.name}</span>
             </td>
-            <td class="p-4 uppercase text-[10px] text-pink-400 font-mono">${ch.type || 'm3u8'}</td>
+            <td class="p-4 uppercase text-[10px] ${typeColor} font-mono">${ch.type || 'm3u8'}</td>
             <td class="p-4 text-center" id="stat-${ch.id}">
                 <span class="text-[10px] text-gray-500 italic">Checking...</span>
             </td>
@@ -42,11 +45,15 @@ async function loadDashboard() {
         listContainer.appendChild(tr);
         checkChannelStatus(ch);
     }
+
+    time();
+    setInterval(time, 5000);
 }
 
 async function checkChannelStatus(ch) {
     let isOnline = false;
 
+    // যদি টাইপ m3u8 হয় তবে নেটওয়ার্ক চেক করবে
     if (ch.type === 'm3u8' || !ch.type) {
         isOnline = await new Promise((resolve) => {
             const video = document.createElement('video');
@@ -57,7 +64,7 @@ async function checkChannelStatus(ch) {
                 video.load();
                 video.remove();
                 resolve(false); 
-            }, 30000); // 30 second timeout
+            }, 15000); // চেক করার সময় ১৫ সেকেন্ড করা হলো দ্রুত রেজাল্টের জন্য
 
             video.onloadedmetadata = () => {
                 clearTimeout(timer);
@@ -72,7 +79,8 @@ async function checkChannelStatus(ch) {
             video.src = ch.url;
         });
     } else {
-        isOnline = true; // YouTube/Iframe defaults
+        // ইউটিউব, আইফ্রেম এবং "TAP" টাইপ সবসময় অনলাইন দেখাবে
+        isOnline = true; 
     }
 
     const statusEl = document.getElementById(`stat-${ch.id}`);
@@ -92,11 +100,12 @@ async function addChannel() {
     const name = document.getElementById('ch-name').value;
     let url = document.getElementById('ch-url').value;
     const logo = document.getElementById('ch-logo').value;
-    const type = document.getElementById('ch-type').value;
+    const type = document.getElementById('ch-type').value; // 'tap' এখান থেকে আসবে
 
     if(!name || !url) return alert("তথ্য পূরণ করুন!");
     if (type === 'youtube') url = getYTID(url);
 
+    // সরাসরি ডাটাবেসে টাইপ সহ সেভ করা
     const { error } = await _supabase.from('channels').insert([{ name, url, logo, type }]);
     if (error) alert("Error: " + error.message);
     else location.reload();
@@ -117,18 +126,9 @@ async function time() {
     if (error) {
         console.error('Error fetching data:', error.message);
     } else if (data) {
-        // 1. Sum up all the seconds from the array of objects
         const totalSeconds = data.reduce((sum, row) => sum + (row.total_seconds || 0), 0);
-        
-        // 2. Convert seconds to hours (Seconds / 3600)
-        // logic: 60 seconds * 60 minutes = 3600
         let totalHours = totalSeconds / 3600;
-        
-        // 3. Update the UI
         document.getElementById('usage-time').innerText = totalHours.toFixed(4) + ' ঘন্টা';
     }
 }
-
-// Run every 5 seconds instead of 500ms to save your Supabase quota!
-setInterval(time, 5000); 
-time();
+setInterval(time, 60);
